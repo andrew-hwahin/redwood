@@ -1,4 +1,4 @@
-import type { UserAgentApplication as AzureActiveDirectory } from 'msal'
+import { PublicClientApplication as AzureActiveDirectory } from '@azure/msal-browser'
 
 export type { AzureActiveDirectory }
 import type { AuthClient } from './'
@@ -13,7 +13,7 @@ export const azureActiveDirectory = (
     type: 'azureActiveDirectory',
     client,
     login: async (options?) => await client.loginPopup(options),
-    logout: (options?) => client.logout(options),
+    logout: async (options?) => await client.logoutPopup(options),
     signup: async (options?) => await client.loginPopup(options),
     getToken: async (options?: any) => {
       const authRequest = options || {
@@ -27,13 +27,13 @@ export const azureActiveDirectory = (
       // if this strategy doesn't work properly.
       try {
         const response = await client.acquireTokenSilent(authRequest)
-        return response?.idToken?.rawIdToken || null
+        return response?.idToken || null
       } catch (error) {
         client.acquireTokenRedirect(authRequest)
       }
 
       return null
     },
-    getUserMetadata: async () => (await client.getAccount()) || null,
+    getUserMetadata: async () => (await client.getActiveAccount()) || null,
   }
 }
